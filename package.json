@@ -1,0 +1,16 @@
+{
+  "name": "backendmajor",
+  "version": "1.0.0",
+  "description": "Major project for learning backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Javascript",
+    "Backend",
+    "NodeJs"
+  ],
+  "author": "Shresht Sharma",
+  "license": "ISC"
+}
