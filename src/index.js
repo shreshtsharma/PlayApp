@@ -11,7 +11,18 @@ dotenv.config({
   path: "./.env",
 });
 
-connectDB();
+connectDB()
+  .then(() => {
+    app.on("error", (error) => {
+      console.log("An application error occurred", error);
+    });
+    app.listen(process.env.PORT || 8000, () => {
+      console.log(`server is running ar port :  ${process.env.PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log("Mongo db connection failed !!!", err);
+  });
 
 // we can write this code if we want to connect our db from index.js file or our main file directly
 // which is not a good approach
