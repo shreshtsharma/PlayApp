@@ -213,7 +213,9 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
   // get the refresh token from browser who is requesting
-  const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken;
+
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
 
   if (!incomingRefreshToken) {
     throw new ApiError(201, "unauthorized request");
@@ -240,8 +242,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     // now if the refresh token matched then generate new access token and refresh token and give it to user
     const { accessToken, newRefreshToken } =
-      await generateAccessAndRefereshTokens();
-
+      await generateAccessAndRefereshTokens(user._id);
     const options = {
       httpOnly: true,
       secure: true,
