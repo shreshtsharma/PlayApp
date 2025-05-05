@@ -23,7 +23,10 @@ app.use(cookieParser());
 // routes import
 import userRouter from "./routes/user.routes.js";
 import tweetRouter from "./routes/tweet.routes.js";
-import commentRouter from "./routes/comment.router.js";
+import commentRouter from "./routes/comment.route.js";
+import playlistRouter from "./routes/playlist.route.js";
+import likeRouter from "./routes/like.route.js";
+
 // routes declaration
 
 // we are calling route directly till now using app.get because route and function executing are there
@@ -31,6 +34,9 @@ import commentRouter from "./routes/comment.router.js";
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/tweets", tweetRouter);
 app.use("/api/v1/comments", commentRouter);
+app.use("/api/v1/playlist", playlistRouter);
+app.use("/api/v1/likes", likeRouter);
+
 // https://localHost:8000/api/V1/users/register
 
 export { app };
