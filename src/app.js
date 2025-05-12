@@ -27,6 +27,7 @@ import commentRouter from "./routes/comment.route.js";
 import playlistRouter from "./routes/playlist.route.js";
 import likeRouter from "./routes/like.route.js";
 import subscriptionRouter from "./routes/subscription.route.js";
+import videoRouter from "./routes/video.route.js";
 // routes declaration
 
 // we are calling route directly till now using app.get because route and function executing are there
@@ -37,6 +38,7 @@ app.use("/api/v1/comments", commentRouter);
 app.use("/api/v1/playlist", playlistRouter);
 app.use("/api/v1/likes", likeRouter);
 app.use("/api/v1/subscriptions", subscriptionRouter);
+app.use("/api/v1/videos", videoRouter);
 
 // https://localHost:8000/api/V1/users/register
 

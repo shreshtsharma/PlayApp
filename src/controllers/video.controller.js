@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError";
 import { ApiResponse } from "../utils/ApiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteFromCloudinary } from "../utils/cloudinary.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   //TODO: get all videos based on query, sort, pagination
@@ -68,8 +69,145 @@ const publishAVideo = asyncHandler(async (req, res) => {
   // 5.and then we'll create a object with title,description,user,and video url in the database
   // 6.we'll return the video object created
 
+  const user = req.user;
   const { title, description } = req.body;
+
   // TODO: get video, upload to cloudinary, create video
+  const videoFileLocalPath = req.files?.videoFile[0].path;
+  const thumbnailLocalPath = req.files?.thumbnail[0].path;
+
+  if (!videoFileLocalPath || !thumbnailLocalPath || !title || !description) {
+    throw new ApiError(400, "All fields are mandatory!!");
+  }
+
+  const uploadedVideoPath = await uploadOnCloudinary(videoFileLocalPath);
+  const uploadedThumbnailPath = await uploadOnCloudinary(thumbnailLocalPath);
+
+  if (!uploadedThumbnailPath || !uploadedVideoPath) {
+    throw new ApiError(
+      400,
+      "Something Went Wrong While Uploading files to cloudinary"
+    );
+  }
+
+  const publishedVideo = await Video.create({
+    title,
+    description,
+    owner: user,
+    thumbnail: uploadedThumbnailPath.url,
+    videoFile: uploadedVideoPath.url,
+  });
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, publishedVideo, "Video Object Created successfully")
+    );
 });
 
-export { getAllVideos };
+const getVideoById = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "invalid Video ID");
+  }
+
+  const video = await Video.findById(videoId);
+
+  if (!video) {
+    throw new ApiError(400, "Not Available");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video, "Video Fetched successfully"));
+});
+
+const updateVideo = asyncHandler(async (req, res) => {
+  //TODO: update video details like title, description, thumbnail
+  // 1.receive title,description and thumbnail from request
+  // 2.check if the fields are present
+  // 3.check if thumbnail uploaded to storage memory correctly
+  // 4.upload thumbnail to cloudinary
+  // 5.search video by id from Video collection in mongodb
+  // 6.get previous thumbnail url from video document
+  // 7.delete previous thumbnail from cloudinary
+  // 8.update the video object with whatever field user is trying to update
+
+  const { videoId } = req.params;
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "invalid Video Id");
+  }
+  const { title, description } = req.body;
+  const thumbnailLocalPath = req.file?.path;
+
+  let uploadedThumbnailPath;
+  const updatedData = {};
+
+  if (thumbnailLocalPath) {
+    uploadedThumbnailPath = await uploadOnCloudinary(thumbnailLocalPath);
+
+    if (!uploadedThumbnailPath) {
+      throw new ApiError(400, "Something went wrong while Uploading");
+    }
+  }
+
+  if (title?.trim() != "") {
+    updatedData.title = title;
+  }
+  if (description?.trim() != "") {
+    updatedData.description = description;
+  }
+
+  if (uploadedThumbnailPath) {
+    updatedData.thumbnail = uploadedThumbnailPath.url;
+  }
+  // deleting old thumbnail
+  if (uploadedThumbnailPath) {
+    const video = await Video.findById(videoId);
+    const oldThumbnail = video.thumbnail;
+    await deleteFromCloudinary(oldThumbnail);
+  }
+  const updatedVideo = await Video.findByIdAndUpdate(videoId, updatedData, {
+    new: true,
+  });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedVideo, "Video updated successfully"));
+});
+
+const deleteVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "invalid Video Id");
+  }
+  const deletedVideo = await Video.findByIdAndDelete(videoId);
+  if (!deletedVideo) {
+    throw new ApiError(401, "something went wrong while deleting video");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "video Deleted successfully"));
+});
+
+const togglePublishStatus = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "invlaid video id");
+  }
+  const updatedStatus = await Video.findByIdAndUpdate(
+    videoId,
+    { ispublished: !video.ispublished },
+    { new: true }
+  );
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedStatus, "status toggled successfully"));
+});
+
+export {
+  getAllVideos,
+  publishAVideo,
+  getVideoById,
+  updateVideo,
+  deleteVideo,
+  togglePublishStatus,
+};
