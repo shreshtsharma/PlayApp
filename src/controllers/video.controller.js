@@ -190,17 +190,42 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
+
   if (!isValidObjectId(videoId)) {
-    throw new ApiError(400, "invlaid video id");
+    throw new ApiError(400, "Invalid video ID");
   }
-  const updatedStatus = await Video.findByIdAndUpdate(
-    videoId,
-    { ispublished: !video.ispublished },
-    { new: true }
-  );
+
+  // First, fetch the current video
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new ApiError(404, "Video not found");
+  }
+
+  // Toggle the ispublished status
+  video.ispublished = !video.ispublished;
+  const updatedStatus = await video.save();
+
   return res
     .status(200)
-    .json(new ApiResponse(200, updatedStatus, "status toggled successfully"));
+    .json(new ApiResponse(200, updatedStatus, "Status toggled successfully"));
+});
+
+const incrementViews = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid Object Id");
+  }
+  const video = await Video.findByIdAndUpdate(
+    videoId,
+    { $inc: { views: 1 } },
+    { new: true }
+  );
+  if (!video) {
+    throw new ApiError(400, "Video not found");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video, "views updated successfully"));
 });
 
 export {
@@ -210,4 +235,5 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
+  incrementViews,
 };
