@@ -28,6 +28,8 @@ import playlistRouter from "./routes/playlist.route.js";
 import likeRouter from "./routes/like.route.js";
 import subscriptionRouter from "./routes/subscription.route.js";
 import videoRouter from "./routes/video.route.js";
+import dashboardRouter from "./routes/dashboard.route.js";
+import healthcheckRouter from "./routes/healthcheck.route.js";
 // routes declaration
 
 // we are calling route directly till now using app.get because route and function executing are there
@@ -39,7 +41,8 @@ app.use("/api/v1/playlist", playlistRouter);
 app.use("/api/v1/likes", likeRouter);
 app.use("/api/v1/subscriptions", subscriptionRouter);
 app.use("/api/v1/videos", videoRouter);
-
+app.use("/api/v1/dashboard", dashboardRouter);
+app.use("/api/v1/healtcheck", healthcheckRouter);
 // https://localHost:8000/api/V1/users/register
 
 export { app };
