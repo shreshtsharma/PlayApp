@@ -1,12 +1,10 @@
 import React from "react";
-// import "./App.css";
+import Navbar from "./components/Navbar/Navbar";
 
 function App() {
   return (
     <>
-      <div className="bg-slate-500 w-full h-full text-black text-3xl">
-        Hello
-      </div>
+      <Navbar />
     </>
   );
 }
